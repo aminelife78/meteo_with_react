@@ -9,13 +9,14 @@ import CloudIcon from "@mui/icons-material/Cloud";
 import axios from "axios";
 
 const CardMeteo = () => {
+  const [langs, setLangs] = useState("fr");
+
   const [latitudeLongitude, setLatitudeLongitude] = useState({
     lat: "",
     lon: "",
   });
   const [datas, setDatas] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [langs, setLangs] = useState("FR");
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -60,11 +61,9 @@ const CardMeteo = () => {
   // changer la langue
 
   const changeLang = () => {
-    const newLangs = langs === "FR" ? "EN" : "FR";
+    const newLangs = langs === "fr" ? "en" : "fr";
     setLangs(newLangs);
   };
-
-  console.log(langs);
 
   return (
     <>
@@ -108,7 +107,7 @@ const CardMeteo = () => {
                     variant="body1"
                     color="text.white"
                   >
-                    {datas[0].main.temp}
+                    {datas[0].main.temp} °c
                   </Typography>
 
                   <img
@@ -121,7 +120,7 @@ const CardMeteo = () => {
 
                 <Grid item sm={12}>
                   <Typography variant="body2" color="text.white">
-                    {datas[0].weather[0].main}
+                    {datas[0].weather[0].description}
                   </Typography>
                 </Grid>
                 <Grid item sm={12} sx={{ mt: "20px" }}>
@@ -130,8 +129,8 @@ const CardMeteo = () => {
                     color="text.white"
                     sx={{ fontSize: "12px" }}
                   >
-                    Max: {datas[0].main.temp_min} | Min:{" "}
-                    {datas[0].main.temp_max}
+                    Max: {datas[0].main.temp_min} °c | {datas[0].main.temp_max}{" "}
+                    °c
                   </Typography>
                 </Grid>
               </Grid>
@@ -151,7 +150,7 @@ const CardMeteo = () => {
         variant="text"
         sx={{ color: "white", padding: "5px 10px" }}
       >
-        {langs === "FR" ? "Français" : "Anglais"}
+        {langs === "fr" ? "Anglais" : "Français"}
       </Button>
     </>
   );
