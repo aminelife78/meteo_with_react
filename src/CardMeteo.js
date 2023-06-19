@@ -103,7 +103,7 @@ const CardMeteo = () => {
               <Grid item sm={8}>
                 <Grid container item sm={12} alignItems="center">
                   <Typography
-                    sx={{ marginRight: "20px", fontSize: "48px" }}
+                    sx={{ marginRight: "20px", fontSize: "32px" }}
                     variant="body1"
                     color="text.white"
                   >
