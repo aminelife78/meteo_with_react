@@ -4,21 +4,40 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { Button, Grid } from "@mui/material";
 import Divider from "@mui/material/Divider";
+import { useTranslation } from "react-i18next";
 import CloudIcon from "@mui/icons-material/Cloud";
+
+import moment from "moment";
 
 import axios from "axios";
 
+// pour afficher la date en français
+import "moment/min/locales";
+
+moment.locale("fr");
+
 const CardMeteo = () => {
+  const { t, i18n } = useTranslation();
   const [langs, setLangs] = useState("fr");
+  const [dateTime, setDateTime] = useState(moment().format("LLLL"));
 
   const [latitudeLongitude, setLatitudeLongitude] = useState({
     lat: "",
     lon: "",
   });
-  const [datas, setDatas] = useState([]);
+  const [datas, setDatas] = useState({
+    name: "",
+    temp: null,
+    descreption: "",
+    icon: "",
+    min: "",
+    max: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setDateTime(moment().format("LLLL"));
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -34,20 +53,26 @@ const CardMeteo = () => {
     } else {
       console.error("Geolocation is not supported by this browser.");
     }
-  }, []);
+  }, [langs]);
 
   const { lat, lon } = latitudeLongitude;
 
   useEffect(() => {
     if (lat !== "" && lon !== "") {
       setIsLoading(true);
+
       axios
         .get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=63cdf98c37b996c743f437b5a6e2594e&lang=${langs}`
         )
         .then((res) => {
-          setDatas((datas) => {
-            return [...datas, res.data];
+          setDatas({
+            name: res.data.name,
+            temp: res.data.main.temp,
+            descreption: res.data.weather[0].description,
+            icon: ` https://openweathermap.org/img/wn/${res.data.weather[0].icon}@2x.png`,
+            min: res.data.main.temp_min,
+            max: res.data.main.temp_max,
           });
           setIsLoading(false);
         })
@@ -61,8 +86,15 @@ const CardMeteo = () => {
   // changer la langue
 
   const changeLang = () => {
-    const newLangs = langs === "fr" ? "en" : "fr";
-    setLangs(newLangs);
+    if (langs === "fr") {
+      setLangs("es");
+      i18n.changeLanguage("es");
+      moment.locale("es");
+    } else {
+      setLangs("fr");
+      i18n.changeLanguage("fr");
+      moment.locale("fr");
+    }
   };
 
   return (
@@ -77,7 +109,7 @@ const CardMeteo = () => {
       >
         {isLoading ? (
           <p>Attendez...</p>
-        ) : datas.length > 0 ? (
+        ) : datas ? (
           <CardContent>
             <Grid
               container
@@ -86,7 +118,7 @@ const CardMeteo = () => {
               alignItems="center"
             >
               <Typography variant="h5" color="text.white" gutterBottom>
-                {datas[0].name}
+                {datas.name}
               </Typography>
 
               <Typography
@@ -95,7 +127,7 @@ const CardMeteo = () => {
                 color="text.white"
                 gutterBottom
               >
-                {new Date().toLocaleDateString()}
+                {dateTime}
               </Typography>
             </Grid>
             <Divider sx={{ marginBottom: "10px", bgcolor: "#ffffff" }} />
@@ -107,20 +139,15 @@ const CardMeteo = () => {
                     variant="body1"
                     color="text.white"
                   >
-                    {datas[0].main.temp} °c
+                    {datas.temp} °c
                   </Typography>
 
-                  <img
-                    width="100"
-                    height="100"
-                    src={`http://openweathermap.org/img/w/${datas[0].weather[0].icon}.png`}
-                    alt="icon"
-                  />
+                  <img width="100" height="100" src={datas.icon} alt="icon" />
                 </Grid>
 
                 <Grid item sm={12}>
                   <Typography variant="body2" color="text.white">
-                    {datas[0].weather[0].description}
+                    {datas.descreption}
                   </Typography>
                 </Grid>
                 <Grid item sm={12} sx={{ mt: "20px" }}>
@@ -129,8 +156,7 @@ const CardMeteo = () => {
                     color="text.white"
                     sx={{ fontSize: "12px" }}
                   >
-                    Max: {datas[0].main.temp_min} °c | {datas[0].main.temp_max}{" "}
-                    °c
+                    {t("min")}: {datas.min} °c | {t("max")}: {datas.max} °c
                   </Typography>
                 </Grid>
               </Grid>
@@ -150,7 +176,7 @@ const CardMeteo = () => {
         variant="text"
         sx={{ color: "white", padding: "5px 10px" }}
       >
-        {langs === "fr" ? "Anglais" : "Français"}
+        {langs === "fr" ? "Espagnole" : "Français"}
       </Button>
     </>
   );
